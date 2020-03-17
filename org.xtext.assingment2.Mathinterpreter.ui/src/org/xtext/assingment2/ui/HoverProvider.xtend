@@ -11,26 +11,37 @@ import org.eclipse.emf.common.util.Diagnostic
 import static extension org.eclipse.emf.ecore.util.EcoreUtil.*
 
 class HoverProvider extends DefaultEObjectHoverProvider {  
+	val mathinterpreter = new MathinterpreterGenerator();
 	
 	override getHoverInfoAsHtml(EObject o) {    
-		//val mathinterpreter = new MathinterpreterGenerator();
-		return '''<p><b>hello</b></p>'''
-//		if (o instanceof MathExpression) {      
-//			val exp = o as MathExpression     
-//			
-//			if (exp instanceof VariableDefinition){
-//				return '''<p><b>«mathinterpreter.display(exp)»</b></p>'''	
-//			} else {
-//				return '''<p>interpretation:<b>«mathinterpreter.display(exp)»</b> <br>value:<b>«mathinterpreter.compute(exp)»</b></p>'''				
-//			}
-//		} else      
-//			return super.getHoverInfoAsHtml(o)
+		
+		if (o instanceof MathExpression){
+			val mexp = o as MathExpression
+			
+			try {
+				if (mexp instanceof VariableDefinition){
+					return  '''
+								<p>
+									<b>«mathinterpreter.display(mexp)»</b>
+								</p>
+							'''	
+				} else {
+					return 	'''
+								<p>
+									interpretation: <b>«mathinterpreter.display(mexp)»</b><br>
+									result: <b>«mathinterpreter.computeResult(mexp)»</b>
+								</p>
+							'''					
+				}
+			}
+			catch (Exception e) {
+				return 	'''
+							<p>
+								interpretation: <b>«mathinterpreter.display(mexp)»</b><br>
+								class: <b>«o.class»</b>
+							</p>
+						'''		
+			}
+		}
 	}
-	
-	def programHasNoError(EObject o) {    
-		for (diagnostic : Diagnostician.INSTANCE.validate(o.rootContainer).children) 
-			if (diagnostic.severity == Diagnostic.ERROR) 
-				return false
-		true
-	} 
 }

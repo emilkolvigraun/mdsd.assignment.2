@@ -46,7 +46,14 @@ class MathinterpreterGenerator extends AbstractGenerator {
 	def String compute(MathExpression math) { 
 		switch (math){
 			VariableDefinition: computeDefinition(math)
-			default: showDialog("Interpreted: "+math.display+" = "+computeExpression(math).toString)
+			default: showDialog("Interpreted: "+math.display+" as "+computeExpression(math).toString)
+		}
+	}
+	
+	def String computeResult(MathExpression math){
+		switch (math){
+			VariableDefinition: math.display
+			default: computeExpression(math).toString
 		}
 	}
 	
@@ -101,16 +108,16 @@ class MathinterpreterGenerator extends AbstractGenerator {
 	
 	def dispatch int computePrimary(Primary factor, HashMap<String, Integer> vars) { 
 		switch(factor){
-			Number: switch (factor) {
-				Positive: factor.value
-				default: -factor.value 
-			}
-			PMParenthesis: factor.computePrimary(vars)
+			Number: factor.getValue
 			DefParenthesis: factor.computeParenthesis(vars)
 			VariableName: factor.variableValue(vars)
 			Variable: computePrimary(factor.expression, vars)
+			PMParenthesis: factor.expression.computePrimary(vars)
 		}
 	}
+	
+	def dispatch int getValue(Negative negative) {-negative.value}
+	def dispatch int getValue(Positive positive) { positive.value}
 	
 	def int variableValue(VariableName name, HashMap<String, Integer> vars){
 		if (vars === null){
@@ -153,7 +160,9 @@ class MathinterpreterGenerator extends AbstractGenerator {
 	def dispatch String display(Multiply multiply){"*"}
 	
 	def dispatch String display(Primary primary){'''«primary.display»'''}
-	def dispatch String display(Number number){'''«number.value»'''}
+	def dispatch String display(Number number){'''«number.display»'''}
+	def dispatch String display(Positive positive){ '''«positive.value»'''	}
+	def dispatch String display(Negative negative){ '''«-negative.value»'''	}
 	def dispatch String display(VariableName varname){'''«varname.name»'''}
 	def dispatch String display(Variable variable) {'''«variable.name»'''}
 	
