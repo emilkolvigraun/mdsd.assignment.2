@@ -1,0 +1,71 @@
+grammar org.xtext.assingment2.Mathinterpreter with org.eclipse.xtext.common.Terminals
+
+generate mathinterpreter "http://www.xtext.org/assingment2/Mathinterpreter"
+
+Model:
+	mathexpression+=MathExpression*
+;
+
+MathExpression:
+	Function | DefineExpr | VariableDefinition
+;
+
+VariableDefinition:
+	'def' variable=Variable 'end'
+;
+
+Function:
+	'result' 'is' expression=PMExpression
+;
+
+DefineExpr:
+	'let' variables+=Variable ('and' variables+=Variable)* 'in' expression=PMExpression 'end'
+;
+
+Variable:
+	name=ID '=' expression=PMExpression
+;
+
+PMExpression:
+    MDExpression ({PMExpression.left=current} operator=PlusMinus right=MDExpression)*
+;
+
+MDExpression:
+	Primary ({MDExpression.left=current} operator=MultiplyDivide right=Primary)*
+;
+
+PlusMinus:
+	{Plus} '+' | {Minus} '-'
+;
+
+MultiplyDivide:
+	{Multiply} '*' | {Divide} '/'
+;
+
+Primary:
+	Number | VariableName | PMParenthesis | DefParenthesis
+;
+
+VariableName:
+	name=ID
+;
+
+Number:
+	Positive | Negative
+;
+
+Positive:
+	value=INT
+;
+
+Negative:
+	'-'value=INT
+;
+
+PMParenthesis:
+	'(' expression=PMExpression ')' 
+;
+
+DefParenthesis:
+	'(' DefineExpr ')'
+;
